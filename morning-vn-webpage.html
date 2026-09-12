@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Morning of September 11 — A True Account</title>
+<style>
+  :root{
+    --ink-void:#060509;
+    --ink-panel:#0d0b13;
+    --ink-line:#221d2c;
+    --bone:#e4d9c8;
+    --bone-dim:#948a7c;
+    --lilac:#a996c9;
+    --lilac-dim:#54486c;
+    --marrow:#b5573f;
+    --blood:#7a2530;
+    --serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:var(--ink-void);
+    color:var(--bone);
+    font-family:var(--serif);
+    overflow:hidden;
+  }
+
+  #stage{
+    position:relative;
+    width:100%;
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  /* painterly grain, over everything */
+  #grain{
+    position:absolute; inset:0;
+    z-index:6;
+    pointer-events:none;
+    opacity:0.5;
+    mix-blend-mode:overlay;
+  }
+  #stage::before{
+    content:"";
+    position:absolute; inset:0;
+    background:radial-gradient(ellipse at 50% 35%, rgba(165,140,201,0.06), transparent 62%),
+               radial-gradient(ellipse at 50% 105%, rgba(0,0,0,0.75), transparent 55%);
+    pointer-events:none;
+    z-index:5;
+  }
+
+  .scene{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    visibility:hidden;
+    transition:opacity 950ms ease;
+    padding:5vh 6vw;
+  }
+  .scene.active{
+    opacity:1;
+    visibility:visible;
+  }
+
+  .art{
+    width:min(48vh, 84vw);
+    height:min(48vh, 84vw);
+    margin-bottom:2.6vh;
+    filter:drop-shadow(0 0 44px rgba(165,140,201,0.10));
+  }
+  .art svg{ width:100%; height:100%; display:block; }
+
+  .meta{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.08em;
+    color:var(--lilac-dim);
+    margin-bottom:1.2vh;
+    min-height:14px;
+    text-align:center;
+  }
+
+  .text{
+    max-width:58ch;
+    text-align:center;
+    font-size:clamp(18px, 2.5vh, 25px);
+    line-height:1.56;
+    color:var(--bone);
+    font-weight:400;
+  }
+  .text em{ color:var(--lilac); font-style:italic; }
+  .text .grind{
+    font-family:var(--mono);
+    letter-spacing:0.05em;
+    color:var(--marrow);
+    font-size:0.85em;
+  }
+  .credit{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:0.1em;
+    color:var(--bone-dim);
+    margin-top:1.6vh;
+  }
+
+  #cover .titlewrap{ text-align:center; }
+  #cover h1{
+    font-size:clamp(30px, 5.6vh, 50px);
+    font-weight:600;
+    letter-spacing:0.01em;
+    margin:0 0 1vh 0;
+    color:var(--bone);
+  }
+  #cover .badge{
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:0.14em;
+    color:var(--marrow);
+    border:1px solid var(--blood);
+    padding:5px 12px;
+    border-radius:2px;
+    margin-bottom:2.2vh;
+  }
+  #cover .date{
+    font-family:var(--mono);
+    color:var(--lilac);
+    font-size:13px;
+    letter-spacing:0.12em;
+    margin-bottom:3.4vh;
+  }
+  #cover .hint{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--bone-dim);
+    letter-spacing:0.08em;
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{opacity:0.35;} 50%{opacity:0.9;} }
+
+  #preface .text{ font-style:italic; color:var(--bone); }
+  #end .text{ font-style:italic; color:var(--bone-dim); }
+
+  .zone{ position:absolute; top:0; bottom:0; width:35%; z-index:20; cursor:pointer; }
+  .zone.left{ left:0; } .zone.right{ right:0; }
+
+  #progress{
+    position:absolute; bottom:3vh; left:0; right:0;
+    display:flex; justify-content:center; gap:6px;
+    z-index:30; pointer-events:none; flex-wrap:wrap; padding:0 8vw;
+  }
+  #progress .dot{
+    width:5px; height:5px; border-radius:50%;
+    background:var(--ink-line);
+    transition:background 400ms, transform 400ms;
+  }
+  #progress .dot.on{ background:var(--lilac); transform:scale(1.6); }
+
+  #scenecount{
+    position:absolute; top:3vh; right:4vw;
+    font-family:var(--mono); font-size:11px;
+    color:var(--bone-dim); letter-spacing:0.08em; z-index:30;
+  }
+  #scenelabel{
+    position:absolute; top:3vh; left:4vw;
+    font-family:var(--mono); font-size:11px;
+    color:var(--blood); letter-spacing:0.1em; z-index:30;
+  }
+
+  .arrowhint{
+    position:absolute; bottom:3vh;
+    font-family:var(--mono); font-size:10px;
+    color:var(--ink-line); letter-spacing:0.1em; z-index:20;
+  }
+  .arrowhint.l{ left:4vw; } .arrowhint.r{ right:4vw; }
+
+  @media (max-width:700px){ .arrowhint{ display:none; } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0">
+  <filter id="paint" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.012 0.02" numOctaves="3" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="10"/>
+  </filter>
+  <filter id="rough" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.03 0.06" numOctaves="2" seed="3" result="n2"/>
+    <feDisplacementMap in="SourceGraphic" in2="n2" scale="5"/>
+  </filter>
+  <filter id="grainFilter">
+    <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" result="noise"/>
+    <feColorMatrix in="noise" type="matrix"
+      values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.06 0"/>
+  </filter>
+</svg>
+
+<div id="stage">
+  <svg id="grain" width="100%" height="100%">
+    <rect width="100%" height="100%" filter="url(#grainFilter)"/>
+  </svg>
+
+  <!-- COVER -->
+  <section class="scene active" id="cover">
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <defs>
+          <radialGradient id="coverglow" cx="50%" cy="34%" r="65%">
+            <stop offset="0%" stop-color="#a996c9" stop-opacity="0.24"/>
+            <stop offset="60%" stop-color="#7a2530" stop-opacity="0.05"/>
+            <stop offset="100%" stop-color="#a996c9" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="200" height="200" fill="var(--ink-panel)"/>
+        <circle cx="100" cy="76" r="72" fill="url(#coverglow)"/>
+        <rect x="140" y="26" width="36" height="48" rx="2" fill="none" stroke="var(--lilac-dim)" stroke-width="1" filter="url(#rough)"/>
+        <line x1="158" y1="26" x2="158" y2="74" stroke="var(--lilac-dim)" stroke-width="1" filter="url(#rough)"/>
+        <line x1="140" y1="50" x2="176" y2="50" stroke="var(--lilac-dim)" stroke-width="1" filter="url(#rough)"/>
+        <rect x="18" y="132" width="152" height="14" rx="3" fill="var(--ink-line)" filter="url(#paint)"/>
+        <path d="M33 132 Q33 100 70 100 Q100 100 100 132 Z" fill="#171320" filter="url(#paint)"/>
+        <path d="M100 132 Q100 106 132 106 Q152 106 152 132 Z" fill="#171320" filter="url(#paint)"/>
+        <ellipse cx="63" cy="122" rx="27" ry="9" fill="#1e1a2a" filter="url(#paint)"/>
+        <ellipse cx="120" cy="122" rx="27" ry="9" fill="#1e1a2a" filter="url(#paint)"/>
+        <circle cx="40" cy="118" r="7" fill="var(--bone-dim)" opacity="0.5" filter="url(#rough)"/>
+        <circle cx="142" cy="118" r="7" fill="var(--bone-dim)" opacity="0.5" filter="url(#rough)"/>
+      </svg>
+    </div>
+    <div class="titlewrap">
+      <div class="badge">A TRUE ACCOUNT — NOT FICTION</div>
+      <h1>The Morning of<br>September 11</h1>
+      <div class="date">05:00 &nbsp;—&nbsp; 05:15 A.M. &nbsp;·&nbsp; 2026</div>
+      <div class="hint">click, tap, or press &rarr; to begin</div>
+    </div>
+  </section>
+
+  <!-- PREFACE -->
+  <section class="scene" id="preface">
+    <div class="meta">A NOTE BEFORE YOU BEGIN</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="var(--ink-panel)"/>
+        <circle cx="100" cy="100" r="2" fill="var(--lilac)"/>
+        <circle cx="100" cy="100" r="55" fill="none" stroke="var(--lilac-dim)" stroke-width="0.8" filter="url(#rough)" opacity="0.6"/>
+        <circle cx="100" cy="100" r="80" fill="none" stroke="var(--blood)" stroke-width="0.6" filter="url(#rough)" opacity="0.35"/>
+      </svg>
+    </div>
+    <div class="text">
+      What follows is not invented. It is my own account of something
+      that happened to me, described as precisely as memory allows.
+      No names have been changed, no events dramatized beyond what I
+      actually experienced — the words are my own, written the way I
+      would tell it to someone sitting across from me.
+      <div class="credit">WRITTEN &amp; ILLUSTRATED BY MAHFUZUR RAHMAN</div>
+    </div>
+  </section>
+
+  <!-- 1: THE ROOM -->
+  <section class="scene" id="s1">
+    <div class="meta">THE ROOM, BEFORE ANYTHING HAPPENED</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <defs>
+          <linearGradient id="dawn1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#3a2f52"/>
+            <stop offset="100%" stop-color="#0d0b13"/>
+          </linearGradient>
+        </defs>
+        <rect width="200" height="200" fill="url(#dawn1)" filter="url(#paint)"/>
+        <rect x="130" y="20" width="42" height="56" fill="#241f3a" opacity="0.7" filter="url(#rough)"/>
+        <rect x="20" y="150" width="160" height="16" fill="var(--ink-line)" filter="url(#paint)"/>
+        <path d="M35 150 Q35 108 100 108 Q165 108 165 150 Z" fill="#141020" filter="url(#paint)"/>
+      </svg>
+    </div>
+    <div class="text">
+      It was still dark, the particular dark just before dawn admits it's
+      losing. The room looked exactly as it always does at that hour —
+      quiet, familiar, unremarkable. I want you to hold that image, because
+      it matters later: nothing about that room, in that moment, suggested
+      anything was wrong.
+    </div>
+  </section>
+
+  <!-- 2: WAKING -->
+  <section class="scene" id="s2">
+    <div class="meta">SOMEWHERE BETWEEN SLEEP AND WAKING</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="var(--ink-panel)" filter="url(#paint)"/>
+        <ellipse cx="100" cy="150" rx="90" ry="16" fill="var(--ink-line)" opacity="0.6"/>
+        <path d="M40 150 Q40 110 100 110 Q160 110 160 150 Z" fill="#171420" filter="url(#paint)"/>
+        <ellipse cx="118" cy="128" rx="30" ry="10" fill="#1e1a2c" filter="url(#paint)"/>
+        <path d="M118 128 l14 -6 l-3 8 l10 -2 l-16 10 z" fill="var(--bone-dim)" opacity="0.85" filter="url(#rough)"/>
+        <g stroke="var(--lilac-dim)" stroke-width="1.5" opacity="0.6" filter="url(#rough)">
+          <path d="M150 118 q8 4 6 12"/>
+          <path d="M154 108 q10 6 6 16"/>
+        </g>
+      </svg>
+    </div>
+    <div class="text">
+      I woke because something was hitting my back. Not fully awake — that
+      strange middle place where the room exists but the mind hasn't
+      agreed to return to it yet.
+      <br><br>
+      Something was moving violently behind me.
+    </div>
+  </section>
+
+  <!-- 3: THE HAND -->
+  <section class="scene" id="s3">
+    <div class="meta">HER HAND</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="var(--ink-panel)" filter="url(#paint)"/>
+        <circle cx="100" cy="95" r="55" fill="none" stroke="var(--lilac-dim)" stroke-width="1" opacity="0.4" filter="url(#rough)"/>
+        <path d="M60 120 q40 -10 80 0" stroke="var(--bone-dim)" stroke-width="2" fill="none" opacity="0.7" filter="url(#rough)"/>
+        <path d="M92 90 l20 -22 l-2 12 l14 -4 l-22 20 z" fill="var(--bone)" opacity="0.9" filter="url(#rough)">
+          <animateTransform attributeName="transform" type="rotate"
+            values="0 100 100; -7 100 100; 5 100 100; 0 100 100" dur="1.5s" repeatCount="indefinite"/>
+        </path>
+      </svg>
+    </div>
+    <div class="text">
+      It was my wife's hand. Jerking back and forth, striking hard enough
+      to wake me. A nightmare, I thought. Maybe a seizure. Maybe apnea.
+      <br><br>
+      I turned toward her. I reached for her hand and grabbed it, trying
+      to steady the movement. <em>For a moment, I thought that was all
+      I needed to do.</em>
+    </div>
+  </section>
+
+  <!-- 4: SHAKING -->
+  <section class="scene" id="s4">
+    <div class="meta">TWO OR THREE SECONDS LATER</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="var(--ink-panel)" filter="url(#paint)"/>
+        <ellipse cx="100" cy="110" rx="46" ry="34" fill="#1a1726" filter="url(#paint)"/>
+        <g stroke="var(--lilac)" stroke-width="1.4" fill="none" opacity="0.8" filter="url(#rough)">
+          <path d="M60 100 q40 -18 80 0"><animate attributeName="d"
+            values="M60 100 q40 -18 80 0; M56 106 q44 -8 88 6; M60 100 q40 -18 80 0"
+            dur="0.3s" repeatCount="indefinite"/></path>
+          <path d="M64 122 q36 16 72 0"><animate attributeName="d"
+            values="M64 122 q36 16 72 0; M60 116 q40 24 80 -4; M64 122 q36 16 72 0"
+            dur="0.26s" repeatCount="indefinite"/></path>
+        </g>
+      </svg>
+    </div>
+    <div class="text">
+      Within two or three seconds, her entire body began shaking.
+      <br><br>
+      Violently.
+      <br><br>
+      By then I was fully awake. The last remnants of sleep disappeared
+      almost instantly. I looked at her face.
+      <br><br>
+      And that was when everything became impossible.
+    </div>
+  </section>
+
+  <!-- 5: FACE BEGINS TO CHANGE -->
+  <section class="scene" id="s5">
+    <div class="meta">HER FACE, BEGINNING TO CHANGE</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <defs>
+          <radialGradient id="faceg" cx="50%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#efe6da"/>
+            <stop offset="100%" stop-color="#c8bba6"/>
+          </radialGradient>
+        </defs>
+        <rect width="200" height="200" fill="var(--ink-panel)" filter="url(#paint)"/>
+        <ellipse cx="100" cy="100" rx="44" ry="52" fill="url(#faceg)" opacity="0.9" filter="url(#paint)"/>
+        <g opacity="0.85" filter="url(#rough)">
+          <path d="M60 68 q-10 42 6 78 q9 18 -12 32" stroke="var(--marrow)" stroke-width="3.4" fill="none"/>
+          <path d="M141 64 q11 44 -5 80 q-10 16 9 32" stroke="var(--marrow)" stroke-width="3.4" fill="none"/>
+          <path d="M74 152 q26 22 52 0" stroke="var(--marrow)" stroke-width="2.6" fill="none"/>
+        </g>
+        <ellipse cx="82" cy="95" rx="7" ry="9" fill="var(--ink-void)" opacity="0.75"/>
+        <ellipse cx="118" cy="95" rx="7" ry="9" fill="var(--ink-void)" opacity="0.75"/>
+      </svg>
+    </div>
+    <div class="text">
+      Her skin seemed to be melting away. Not metaphorically. Not the way
+      a nightmare distorts things — I could see it happening, in real
+      time, the way wax gives way under heat. Her features began to lose
+      their human structure, as though the skin itself were dissolving
+      and pulling back from whatever was underneath.
+    </div>
+  </section>
+
+  <!-- 6: THE SKIN GIVES WAY (new, more explicit) -->
+  <section class="scene" id="s6">
+    <div class="meta">WHAT THE SKIN LEFT BEHIND</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#080609" filter="url(#paint)"/>
+        <defs>
+          <radialGradient id="wetg" cx="50%" cy="45%" r="60%">
+            <stop offset="0%" stop-color="#7a2530" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#7a2530" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <circle cx="100" cy="100" r="70" fill="url(#wetg)"/>
+        <path d="M65 75 q-6 30 8 55 q5 10 -6 22" fill="none" stroke="var(--blood)" stroke-width="2.6" opacity="0.8" filter="url(#rough)"/>
+        <path d="M135 72 q7 32 -6 58 q-4 10 8 22" fill="none" stroke="var(--blood)" stroke-width="2.6" opacity="0.8" filter="url(#rough)"/>
+        <path d="M78 60 q22 -10 44 0" fill="none" stroke="var(--bone)" stroke-width="2" opacity="0.55" filter="url(#rough)"/>
+        <g opacity="0.9" filter="url(#rough)">
+          <path d="M70 100 q30 -14 60 0" stroke="var(--bone)" stroke-width="1.6" fill="none"/>
+          <path d="M74 116 q26 12 52 0" stroke="var(--bone)" stroke-width="1.6" fill="none"/>
+        </g>
+      </svg>
+    </div>
+    <div class="text">
+      I don't say this lightly, and I've thought hard about whether to
+      describe it at all: what came through was not raw or bloody in the
+      way an injury would be. It was drier than that. Tissue drawn back
+      like old parchment, tightening against bone that had no business
+      being visible. <em>The more I looked, the worse it became.</em>
+    </div>
+  </section>
+
+  <!-- 7: THE EYES -->
+  <section class="scene" id="s7">
+    <div class="meta">HER EYES</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#060509" filter="url(#paint)"/>
+        <ellipse cx="80" cy="100" rx="14" ry="18" fill="#000" filter="url(#rough)"/>
+        <ellipse cx="120" cy="100" rx="14" ry="18" fill="#000" filter="url(#rough)"/>
+        <circle cx="80" cy="103" r="3" fill="var(--lilac)" opacity="0.75">
+          <animate attributeName="opacity" values="0.75;0.2;0.75" dur="2.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="120" cy="103" r="3" fill="var(--lilac)" opacity="0.75">
+          <animate attributeName="opacity" values="0.2;0.75;0.2" dur="2.2s" repeatCount="indefinite"/>
+        </circle>
+        <path d="M62 88 q18 -10 36 0" stroke="var(--bone)" stroke-width="1.4" fill="none" opacity="0.6" filter="url(#rough)"/>
+        <path d="M102 88 q18 -10 36 0" stroke="var(--bone)" stroke-width="1.4" fill="none" opacity="0.6" filter="url(#rough)"/>
+      </svg>
+    </div>
+    <div class="text">
+      Her eyes had sunk deep into their sockets — not closed, not rolled
+      back, just <em>gone</em> further into her skull than eyes should be
+      able to go, two points of faint, wrong light sitting in the dark
+      where they should have been.
+    </div>
+  </section>
+
+  <!-- 8: THE MOUTH -->
+  <section class="scene" id="s8">
+    <div class="meta">HER MOUTH</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#050408" filter="url(#paint)"/>
+        <path d="M60 105 Q100 130 140 105 Q140 118 100 132 Q60 118 60 105 Z"
+              fill="#0a0810" stroke="var(--bone)" stroke-width="1.6" filter="url(#rough)"/>
+        <g stroke="var(--bone)" stroke-width="1.4" opacity="0.9" filter="url(#rough)">
+          <line x1="70" y1="110" x2="70" y2="122"/>
+          <line x1="80" y1="112" x2="80" y2="126"/>
+          <line x1="90" y1="113" x2="90" y2="128"/>
+          <line x1="100" y1="114" x2="100" y2="129"/>
+          <line x1="110" y1="113" x2="110" y2="128"/>
+          <line x1="120" y1="112" x2="120" y2="126"/>
+          <line x1="130" y1="110" x2="130" y2="122"/>
+        </g>
+      </svg>
+    </div>
+    <div class="text">
+      There were no lips left to make a mouth out of. What remained was
+      only the architecture underneath — a jaw, and teeth, set in an
+      expression no face is meant to hold while breathing beside you.
+    </div>
+  </section>
+
+  <!-- 9: FULL SKULL -->
+  <section class="scene" id="s9">
+    <div class="meta">WHAT WAS LEFT WHERE HER FACE HAD BEEN</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#040308" filter="url(#paint)"/>
+        <defs>
+          <radialGradient id="boneglow2" cx="50%" cy="38%" r="62%">
+            <stop offset="0%" stop-color="#e4d9c8" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#e4d9c8" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <circle cx="100" cy="95" r="82" fill="url(#boneglow2)"/>
+        <path d="M60 68
+                 Q58 36 100 34
+                 Q142 36 140 68
+                 Q144 92 133 110
+                 Q127 124 116 128
+                 L112 150 L108 128
+                 L100 150 L92 128
+                 L88 128
+                 Q73 124 67 110
+                 Q56 92 60 68 Z"
+              fill="none" stroke="var(--bone)" stroke-width="2.2" opacity="0.95" filter="url(#rough)"/>
+        <ellipse cx="79" cy="80" rx="11" ry="14" fill="#040308" stroke="var(--bone)" stroke-width="1.6" filter="url(#rough)"/>
+        <ellipse cx="121" cy="80" rx="11" ry="14" fill="#040308" stroke="var(--bone)" stroke-width="1.6" filter="url(#rough)"/>
+        <path d="M97 95 l-5 15 h10 z" fill="none" stroke="var(--bone)" stroke-width="1.3" opacity="0.85" filter="url(#rough)"/>
+        <g stroke="var(--bone)" stroke-width="1.3" opacity="0.9" filter="url(#rough)">
+          <line x1="79" y1="124" x2="79" y2="135"/>
+          <line x1="87" y1="125" x2="87" y2="137"/>
+          <line x1="94" y1="126" x2="94" y2="138"/>
+          <line x1="101" y1="126" x2="101" y2="138"/>
+          <line x1="108" y1="125" x2="108" y2="137"/>
+          <line x1="115" y1="124" x2="115" y2="135"/>
+        </g>
+        <circle cx="79" cy="83" r="2.4" fill="var(--lilac)" opacity="0.7"/>
+        <circle cx="121" cy="83" r="2.4" fill="var(--lilac)" opacity="0.7"/>
+      </svg>
+    </div>
+    <div class="text">
+      What was lying beside me, for those seconds, had no face left to
+      recognize as hers. A skull. Her skull, I have to assume, though
+      nothing in me wanted to make that connection at the time.
+      <br><br>
+      For some reason, I didn't scream. I didn't even let go of her hand.
+      <em>I froze. Completely.</em> My body simply stopped answering to me.
+    </div>
+  </section>
+
+  <!-- 10: FROZEN -->
+  <section class="scene" id="s10">
+    <div class="meta">UNABLE TO MOVE</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="var(--ink-panel)" filter="url(#paint)"/>
+        <circle cx="100" cy="100" r="3" fill="var(--lilac)"/>
+        <g stroke="var(--lilac-dim)" stroke-width="1" opacity="0.5" filter="url(#rough)">
+          <circle cx="100" cy="100" r="22"><animate attributeName="r" values="22;72;22" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.6;0;0.6" dur="4s" repeatCount="indefinite"/></circle>
+          <circle cx="100" cy="100" r="42"><animate attributeName="r" values="42;92;42" dur="4s" begin="1s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.4;0;0.4" dur="4s" begin="1s" repeatCount="indefinite"/></circle>
+        </g>
+        <text x="100" y="172" text-anchor="middle" font-family="monospace" font-size="10" fill="var(--bone-dim)" letter-spacing="3">TEN SECONDS. MAYBE FIFTEEN.</text>
+      </svg>
+    </div>
+    <div class="text">
+      I could see what was happening. I could understand that it was
+      horrifying. But I couldn't move. I couldn't pull my hand away.
+      I couldn't turn my head. I couldn't even seem to breathe properly.
+      <br><br>
+      I just watched.
+    </div>
+  </section>
+
+  <!-- 11: SHE SPEAKS -->
+  <section class="scene" id="s11">
+    <div class="meta">THE SOUND</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#050408" filter="url(#paint)"/>
+        <ellipse cx="100" cy="100" rx="15" ry="9" fill="none" stroke="var(--marrow)" stroke-width="2.2" filter="url(#rough)"/>
+        <line x1="87" y1="100" x2="113" y2="100" stroke="var(--marrow)" stroke-width="1.5" filter="url(#rough)"/>
+        <g stroke="var(--lilac)" stroke-width="1.2" opacity="0.75" fill="none" filter="url(#rough)">
+          <path d="M120 100 q10 -4 18 -10"><animate attributeName="d"
+            values="M120 100 q10 -4 18 -10; M120 100 q12 4 20 8; M120 100 q10 -4 18 -10" dur="0.45s" repeatCount="indefinite"/></path>
+          <path d="M120 100 q14 0 26 0"><animate attributeName="opacity" values="0.75;0.1;0.75" dur="0.35s" repeatCount="indefinite"/></path>
+          <path d="M120 100 q10 6 18 12"><animate attributeName="d"
+            values="M120 100 q10 6 18 12; M120 100 q12 -6 20 -10; M120 100 q10 6 18 12" dur="0.4s" repeatCount="indefinite"/></path>
+        </g>
+      </svg>
+    </div>
+    <div class="text">
+      Then she began to speak.
+      <br><br>
+      There were no lips to form the words. I could hear the teeth
+      grinding against each other as she spoke. A harsh, unmistakable sound.
+      <br><br>
+      <span class="grind">grinding — speaking — grinding —</span>
+      <br><br>
+      I don't remember exactly what was said. What I remember is the sound.
+    </div>
+  </section>
+
+  <!-- 12: THE CALM -->
+  <section class="scene" id="s12">
+    <div class="meta">A STRANGE CALM</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="var(--ink-panel)" filter="url(#paint)"/>
+        <circle cx="100" cy="100" r="60" fill="none" stroke="var(--lilac-dim)" stroke-width="1" filter="url(#rough)"/>
+        <g font-family="monospace" font-size="9" fill="var(--bone-dim)" opacity="0.9">
+          <text x="100" y="60" text-anchor="middle">what the fuck is happening?</text>
+          <text x="100" y="90" text-anchor="middle">am I hallucinating?</text>
+          <text x="100" y="120" text-anchor="middle">is this a sleep phenomenon?</text>
+          <text x="100" y="150" text-anchor="middle">am I still dreaming?</text>
+        </g>
+      </svg>
+    </div>
+    <div class="text">
+      Strangely, somewhere in those seconds, my fear disappeared. It
+      didn't gradually fade — it was simply gone. I became completely calm.
+      <br><br>
+      I started thinking instead. But I didn't feel asleep. My eyes were
+      wide open. Everything looked real. <em>Too real.</em> Except for her.
+    </div>
+  </section>
+
+  <!-- 13: THE VEIL -->
+  <section class="scene" id="s13">
+    <div class="meta">THE VEIL</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#0a0812" filter="url(#paint)"/>
+        <rect x="30" y="60" width="140" height="90" rx="10" fill="#15121e" filter="url(#paint)"/>
+        <rect x="20" y="50" width="160" height="110" rx="14" fill="none"
+              stroke="var(--lilac)" stroke-width="1" opacity="0.5" filter="url(#rough)">
+          <animate attributeName="opacity" values="0.3;0.65;0.3" dur="3s" repeatCount="indefinite"/>
+        </rect>
+        <rect x="24" y="54" width="152" height="102" rx="12" fill="none"
+              stroke="var(--lilac)" stroke-width="0.6" opacity="0.3" filter="url(#rough)"/>
+      </svg>
+    </div>
+    <div class="text">
+      A thin veil seemed to surround the bed. Not a curtain. Not smoke.
+      Not fog — something thin and almost transparent, as though an
+      invisible layer had been drawn around us, and the space inside it
+      had become separate from the rest of the room.
+      <br><br>
+      I noticed it, but by then I wasn't particularly frightened. I was
+      thinking. <em>If this was some kind of entity, what did it want?</em>
+    </div>
+  </section>
+
+  <!-- 14: SOMETHING WATCHING (new) -->
+  <section class="scene" id="s14">
+    <div class="meta">A PRESENCE, JUST OUTSIDE THE VEIL</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#050409" filter="url(#paint)"/>
+        <ellipse cx="150" cy="90" rx="26" ry="46" fill="#0a0812" opacity="0.9" filter="url(#paint)"/>
+        <ellipse cx="150" cy="90" rx="26" ry="46" fill="none" stroke="var(--lilac-dim)" stroke-width="0.8" opacity="0.4" filter="url(#rough)"/>
+        <circle cx="145" cy="78" r="1.6" fill="var(--lilac)" opacity="0.8">
+          <animate attributeName="opacity" values="0.8;0.1;0.8" dur="1.8s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="156" cy="78" r="1.6" fill="var(--lilac)" opacity="0.8">
+          <animate attributeName="opacity" values="0.1;0.8;0.1" dur="1.8s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+    </div>
+    <div class="text">
+      I want to be honest about something I've hesitated to include: I
+      had the distinct, unshakeable sense that we were not alone in that
+      space the veil had made. Nothing I could point to — no shape I could
+      swear to in a court of law. Just the certainty, the way you know
+      someone is standing behind you before you turn around.
+    </div>
+  </section>
+
+  <!-- 15: SITTING UP -->
+  <section class="scene" id="s15">
+    <div class="meta">TWENTY, MAYBE TWENTY-FIVE SECONDS</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="var(--ink-panel)" filter="url(#paint)"/>
+        <path d="M60 150 Q60 90 100 90" stroke="var(--bone)" stroke-width="2" fill="none" opacity="0.85" filter="url(#rough)">
+          <animate attributeName="d" values="M60 150 Q60 130 100 130; M60 150 Q60 90 100 90" dur="0.6s" fill="freeze"/>
+        </path>
+        <circle cx="100" cy="80" r="10" fill="var(--bone)" opacity="0.9" filter="url(#rough)">
+          <animate attributeName="cy" values="120;80" dur="0.6s" fill="freeze"/>
+        </circle>
+        <rect x="20" y="150" width="160" height="10" rx="3" fill="var(--ink-line)"/>
+      </svg>
+    </div>
+    <div class="text">
+      I finally forced myself to move. I sat up.
+      <br><br>
+      And the instant I did, everything stopped. The skull was gone. The
+      dissolved skin was gone. The sunken eyes, the teeth, the veil, the
+      presence I couldn't name, the strange lilac light — all of it, gone.
+      <br><br>
+      My wife lay beside me exactly as she should have been. Peacefully
+      asleep. Completely, ordinarily normal.
+    </div>
+  </section>
+
+  <!-- 16: SECOND INCIDENT -->
+  <section class="scene" id="s16">
+    <div class="meta">A FEW MINUTES LATER</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="var(--ink-panel)" filter="url(#paint)"/>
+        <path d="M40 150 Q40 110 100 110 Q160 110 160 150 Z" fill="#171420" filter="url(#paint)"/>
+        <ellipse cx="72" cy="128" rx="24" ry="9" fill="#1c1928" filter="url(#paint)"/>
+        <ellipse cx="128" cy="128" rx="24" ry="9" fill="#1c1928" filter="url(#paint)"/>
+        <path d="M128 128 l14 -6 l-3 8 l10 -2 l-16 10 z" fill="var(--bone-dim)" opacity="0.9" filter="url(#rough)">
+          <animateTransform attributeName="transform" type="translate" values="0 0;-6 4;0 0" dur="0.5s" repeatCount="3"/>
+        </path>
+      </svg>
+    </div>
+    <div class="text">
+      I lay there facing away from her, trying to calm myself, trying to
+      convince myself to go back to sleep. Maybe I had dreamed it. Maybe
+      I hadn't.
+      <br><br>
+      Then something hit my back again. Her hand. The exact same movement.
+      <br><br>
+      <em>Fuck. No. Not again.</em>
+    </div>
+  </section>
+
+  <!-- 17: WHAT HAPPENED -->
+  <section class="scene" id="s17">
+    <div class="meta">"WHAT HAPPENED?"</div>
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="var(--ink-panel)" filter="url(#paint)"/>
+        <ellipse cx="100" cy="105" rx="34" ry="40" fill="#efe6da" opacity="0.92" filter="url(#paint)"/>
+        <circle cx="88" cy="100" r="3.5" fill="var(--ink-void)"/>
+        <circle cx="112" cy="100" r="3.5" fill="var(--ink-void)"/>
+        <path d="M92 120 q8 5 16 0" stroke="var(--ink-void)" stroke-width="2" fill="none"/>
+      </svg>
+    </div>
+    <div class="text">
+      This time I didn't grab her hand. I pushed her shoulder, trying to
+      wake her normally. She stirred. Her eyes opened. Half asleep.
+      <br><br>
+      <em>"What happened?"</em> she asked.
+      <br><br>
+      I didn't answer. She got up, went to the bathroom, came back, and
+      went to sleep again. No skull. No dissolved skin. No grinding teeth.
+      No veil. No presence. Nothing. Just my wife, sleeping beside me.
+    </div>
+  </section>
+
+  <!-- END -->
+  <section class="scene" id="end">
+    <div class="art">
+      <svg viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#050408" filter="url(#paint)"/>
+        <circle cx="100" cy="100" r="1.5" fill="var(--lilac)"/>
+        <circle cx="100" cy="100" r="60" fill="none" stroke="var(--lilac-dim)" stroke-width="0.6" opacity="0.4" filter="url(#rough)"/>
+      </svg>
+    </div>
+    <div class="text">
+      I still don't know what happened that morning. I don't believe it
+      was supernatural. But I can't honestly say I understand it.
+      <br><br>
+      I know what I saw. I know what I felt. And I know that for roughly
+      twenty seconds, maybe a little longer, I watched the woman sleeping
+      beside me become something that looked nothing like a human being.
+      <br><br>
+      Then I sat up. And it was gone.
+      <br><br>
+      It's the fact that, for those few seconds, I was completely
+      convinced that something impossible was happening right beside me.
+      <br><br>
+      And then reality simply switched itself back on.
+    </div>
+    <div class="meta" style="margin-top:2.4vh;">— END —</div>
+    <div class="credit">A TRUE ACCOUNT · WRITTEN &amp; ILLUSTRATED BY MAHFUZUR RAHMAN</div>
+  </section>
+
+  <div class="zone left" onclick="go(-1)"></div>
+  <div class="zone right" onclick="go(1)"></div>
+  <div class="arrowhint l">&larr; prev</div>
+  <div class="arrowhint r">next &rarr;</div>
+  <div id="scenelabel">TRUE ACCOUNT</div>
+  <div id="scenecount"></div>
+  <div id="progress"></div>
+</div>
+
+<script>
+  const scenes = [...document.querySelectorAll('.scene')];
+  let idx = 0;
+
+  const progress = document.getElementById('progress');
+  scenes.forEach(() => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    progress.appendChild(d);
+  });
+  const dots = [...progress.children];
+  const counter = document.getElementById('scenecount');
+
+  function render(){
+    scenes.forEach((s,i)=> s.classList.toggle('active', i===idx));
+    dots.forEach((d,i)=> d.classList.toggle('on', i===idx));
+    counter.textContent = (idx+1) + ' / ' + scenes.length;
+  }
+
+  function go(dir){
+    const next = idx + dir;
+    if(next < 0 || next >= scenes.length) return;
+    idx = next;
+    render();
+  }
+
+  window.addEventListener('keydown', (e)=>{
+    if(e.key === 'ArrowRight' || e.key === ' ') go(1);
+    if(e.key === 'ArrowLeft') go(-1);
+  });
+
+  render();
+</script>
+
+</body>
+</html>
